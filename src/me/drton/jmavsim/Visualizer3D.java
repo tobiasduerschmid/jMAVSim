@@ -216,7 +216,7 @@ public class Visualizer3D extends JFrame {
 
         setViewType(VIEW_TYPE);
         setZoomMode(ZOOM_MODE);
-        setVisible(true);
+        setVisible(false);        // change to false to not have GUI
         splitPane.resetToPreferredSizes();
         toggleReportPanel(false);
         resetView();

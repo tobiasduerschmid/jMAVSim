@@ -54,6 +54,10 @@ public class Simulator implements Runnable {
     }
     private static Port PORT = Port.UDP;
 
+    // path to the json file for environment arguments
+    // private static final String CONFIG_PATH = "../../environment/configurations.json";
+    private static final String CONFIG_PATH = "../../../../config.json";
+
     public static boolean   COMMUNICATE_WITH_QGC  = false;   // open UDP port to QGC
     public static boolean   COMMUNICATE_WITH_SDK  = false;   // open UDP port to SDK
     public static boolean   DO_MAG_FIELD_LOOKUP   =
@@ -189,7 +193,8 @@ public class Simulator implements Runnable {
         // Create environment
         SimpleEnvironment simpleEnvironment = new SimpleEnvironment(world);
         //simpleEnvironment.setWind(new Vector3d(0.8, 2.0, 0.0));
-        simpleEnvironment.setWindDeviation(new Vector3d(6.0, 8.0, 0.00));
+        // simpleEnvironment.setWindDeviation(new Vector3d(6.0, 8.0, 0.00));
+        
         //==============================================================================
         // set gravity
         // Vector3d(0.0, 0.0 9.80665) is default, might need to set
@@ -208,10 +213,11 @@ public class Simulator implements Runnable {
 //            simpleEnvironment.setMagField(new Vector3d(0.21523, 0.0, 0.42741));
 //        }
 
-        // set ground level
-//        if(configurations.change_ground_level){
-            simpleEnvironment.setGroundLevel(configurations.ground_level);
-//        }
+        // set wind
+        simpleEnvironment.setWind(configurations.wind);
+
+        // set wind deviation
+        simpleEnvironment.setWindDeviation(configurations.windDeviation);
         //==============================================================================
         //simpleEnvironment.setGroundLevel(0.0f);
         world.addObject(simpleEnvironment);
@@ -479,31 +485,40 @@ public class Simulator implements Runnable {
         vehicle.setDragMove(0.01);
         //=====================================================================
         // set ignore gravity if specified
-//        if(configurations.ignore_gravity){
-//            vehicle.setIgnoreGravity(true);
-//        }
+    //    if(configurations.ignore_gravity){
+    //        vehicle.setIgnoreGravity(true);
+    //    }
 
         // only create sensors if we don't want to deactivate them
-        if(configurations.deactivate_sensors == false){
-            SimpleSensors sensors = new SimpleSensors();
-            sensors.setGPSInterval(50);
-            sensors.setGPSDelay(200);
-            sensors.setNoise_Acc(0.05f);
-            sensors.setNoise_Gyo(0.01f);
-            sensors.setNoise_Mag(0.005f);
-            sensors.setNoise_Prs(0.1f);
-            vehicle.setSensors(sensors, getSimMillis());
-        }
+        // if(configurations.deactivate_sensors == false){
+        //     SimpleSensors sensors = new SimpleSensors();
+        //     sensors.setGPSInterval(50);
+        //     sensors.setGPSDelay(200);
+        //     sensors.setNoise_Acc(0.05f);
+        //     sensors.setNoise_Gyo(0.01f);
+        //     sensors.setNoise_Mag(0.005f);
+        //     sensors.setNoise_Prs(0.1f);
+        //     vehicle.setSensors(sensors, getSimMillis());
+        // }
+        // else{
+        //     SimpleSensors sensors = new SimpleSensors();
+        //     sensors.setGPSDelay(50);
+        //     vehicle.setSensors(sensors, getSimMillis());
+        // }
         //=====================================================================
-//        SimpleSensors sensors = new SimpleSensors();
-//        sensors.setGPSInterval(50);
-//        sensors.setGPSDelay(200);
-//        sensors.setNoise_Acc(0.05f);
-//        sensors.setNoise_Gyo(0.01f);
-//        sensors.setNoise_Mag(0.005f);
-//        sensors.setNoise_Prs(0.1f);
-//        vehicle.setSensors(sensors, getSimMillis());
-        //v.setDragRotate(0.1);
+       SimpleSensors sensors = new SimpleSensors();
+       sensors.setGPSInterval(50);
+       sensors.setGPSDelay(200);
+    //    sensors.setNoise_Acc(0.05f);
+    //    sensors.setNoise_Gyo(0.01f);
+    //    sensors.setNoise_Mag(0.005f);
+    //    sensors.setNoise_Prs(0.1f);
+       sensors.setNoise_Acc((float)configurations.noise_acc);
+       sensors.setNoise_Gyo((float)configurations.noise_gyo);
+       sensors.setNoise_Mag((float)configurations.noise_mag);
+       sensors.setNoise_Prs((float)configurations.noise_prs);
+       vehicle.setSensors(sensors, getSimMillis());
+    //    v.setDragRotate(0.1);
 
         return vehicle;
     }
@@ -533,6 +548,7 @@ public class Simulator implements Runnable {
         sensors.setNoise_Gyo(0.001f);
         sensors.setNoise_Mag(0.005f);
         sensors.setNoise_Prs(0.01f);
+        
 
         vehicle.setSensors(sensors, getSimMillis());
 
@@ -712,8 +728,9 @@ public class Simulator implements Runnable {
         //=======================================================================================
         // parse JSON configuration file
         Object obj = null;
+        // System.out.println(CONFIG_PATH);
         try{
-            obj = new JSONParser().parse(new FileReader("/Users/jeaniechen/Desktop/CMU_REU/Firmware/Tools/jMAVSim/environment/configurations.json"));
+            obj = new JSONParser().parse(new FileReader(CONFIG_PATH));
         }catch(Exception e){
             e.printStackTrace();
             System.out.println("Cannot parse json file");
@@ -721,7 +738,14 @@ public class Simulator implements Runnable {
 
         JSONObject jo = (JSONObject) obj;
         // get values
-        configurations.deactivate_sensors = (boolean) jo.get("deactivate_sensors");
+        // configurations.deactivate_sensors = (boolean) jo.get("deactivate_sensors");
+
+        configurations.noise_acc = (double) jo.get("sensor_noise_acc");
+        configurations.noise_gyo = (double) jo.get("sensor_noise_gyo");
+        configurations.noise_mag = (double) jo.get("sensor_noise_mag");
+        configurations.noise_prs = (double) jo.get("sensor_noise_prs");
+
+        // configurations.ignore_gravity = (boolean) jo.get("ignore_gravity");
 //        System.out.println(configurations.deactivate_sensors);
         configurations.rotor_orientation = (String) jo.get("rotor_orientation");
 //        System.out.println(configurations.rotor_orientation);
@@ -737,10 +761,13 @@ public class Simulator implements Runnable {
 //            System.out.println(arguments[i]);
             i++;
         }
-        configurations.gravity = new Vector3d(arguments[0], arguments[1], arguments[2]);
-
-        configurations.ground_level = (double) jo.get("ground_level");
-//        System.out.println(configurations.ground_level);
+        // a way to set gravity to default value
+        if(arguments[0] == 0.0 && arguments[1] == 0.0 && arguments[2] > 9.5){
+            configurations.gravity = null;
+        }
+        else{
+            configurations.gravity = new Vector3d(arguments[0], arguments[1], arguments[2]);
+        }
 
         // iterate magnetic field map
         Map mag = ((Map) jo.get("magnetic_field"));
@@ -753,6 +780,30 @@ public class Simulator implements Runnable {
             i++;
         }
         configurations.magField = new Vector3d(arguments[0], arguments[1], arguments[2]);
+
+        // iterate wind map
+        Map wind = ((Map) jo.get("wind"));
+        Iterator<Map.Entry> itr3 = (Iterator<Map.Entry>) wind.entrySet().iterator();
+        i = 0;
+        while (itr3.hasNext()) {
+            Map.Entry pair = itr3.next();
+            arguments[i] = (double) pair.getValue();
+//            System.out.println(arguments[i]);
+            i++;
+        }
+        configurations.wind = new Vector3d(arguments[0], arguments[1], arguments[2]);
+
+        // iterate wind deviation map
+        Map wind_dev = ((Map) jo.get("wind_deviation"));
+        Iterator<Map.Entry> itr4 = (Iterator<Map.Entry>) wind_dev.entrySet().iterator();
+        i = 0;
+        while (itr4.hasNext()) {
+            Map.Entry pair = itr4.next();
+            arguments[i] = (double) pair.getValue();
+//            System.out.println(arguments[i]);
+            i++;
+        }
+        configurations.windDeviation = new Vector3d(arguments[0], arguments[1], arguments[2]);
         //=======================================================================================
 
         i = 0;
