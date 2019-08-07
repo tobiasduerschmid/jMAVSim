@@ -20,7 +20,7 @@ public class SimpleEnvironment extends Environment {
 
     public SimpleEnvironment(World world) {
         super(world);
-//        setG(null);
+        // setG(null);
 //        setMagField(new Vector3d(0.21523, 0.0, 0.42741));
     }
 
