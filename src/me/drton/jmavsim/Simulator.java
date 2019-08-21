@@ -55,7 +55,6 @@ public class Simulator implements Runnable {
     private static Port PORT = Port.UDP;
 
     // path to the json file for environment arguments
-    // private static final String CONFIG_PATH = "../../environment/configurations.json";
     private static final String CONFIG_PATH = "../../../../config.json";
 
     public static boolean   COMMUNICATE_WITH_QGC  = false;   // open UDP port to QGC
@@ -199,19 +198,9 @@ public class Simulator implements Runnable {
         // set gravity
         // Vector3d(0.0, 0.0 9.80665) is default, might need to set
         simpleEnvironment.setG(configurations.gravity);
-//        if(configurations.change_gravity){
-//            simpleEnvironment.setG(configurations.gravity);
-//        }else {
-//            simpleEnvironment.setG(null);
-//        }
 
         // set magnetic field
         simpleEnvironment.setMagField(configurations.magField);
-//        if(configurations.change_mag){
-//            simpleEnvironment.setMagField(configurations.magField);
-//        }else{
-//            simpleEnvironment.setMagField(new Vector3d(0.21523, 0.0, 0.42741));
-//        }
 
         // set wind
         simpleEnvironment.setWind(configurations.wind);
@@ -219,7 +208,7 @@ public class Simulator implements Runnable {
         // set wind deviation
         simpleEnvironment.setWindDeviation(configurations.windDeviation);
         //==============================================================================
-        //simpleEnvironment.setGroundLevel(0.0f);
+
         world.addObject(simpleEnvironment);
 
         // Create GUI
@@ -483,29 +472,7 @@ public class Simulator implements Runnable {
         vehicle.setMomentOfInertia(I);
         vehicle.setMass(0.8);
         vehicle.setDragMove(0.01);
-        //=====================================================================
-        // set ignore gravity if specified
-    //    if(configurations.ignore_gravity){
-    //        vehicle.setIgnoreGravity(true);
-    //    }
 
-        // only create sensors if we don't want to deactivate them
-        // if(configurations.deactivate_sensors == false){
-        //     SimpleSensors sensors = new SimpleSensors();
-        //     sensors.setGPSInterval(50);
-        //     sensors.setGPSDelay(200);
-        //     sensors.setNoise_Acc(0.05f);
-        //     sensors.setNoise_Gyo(0.01f);
-        //     sensors.setNoise_Mag(0.005f);
-        //     sensors.setNoise_Prs(0.1f);
-        //     vehicle.setSensors(sensors, getSimMillis());
-        // }
-        // else{
-        //     SimpleSensors sensors = new SimpleSensors();
-        //     sensors.setGPSDelay(50);
-        //     vehicle.setSensors(sensors, getSimMillis());
-        // }
-        //=====================================================================
        SimpleSensors sensors = new SimpleSensors();
        sensors.setGPSInterval(50);
        sensors.setGPSDelay(200);
@@ -728,7 +695,7 @@ public class Simulator implements Runnable {
         //=======================================================================================
         // parse JSON configuration file
         Object obj = null;
-        // System.out.println(CONFIG_PATH);
+
         try{
             obj = new JSONParser().parse(new FileReader(CONFIG_PATH));
         }catch(Exception e){
@@ -738,17 +705,13 @@ public class Simulator implements Runnable {
 
         JSONObject jo = (JSONObject) obj;
         // get values
-        // configurations.deactivate_sensors = (boolean) jo.get("deactivate_sensors");
-
         configurations.noise_acc = (double) jo.get("sensor_noise_acc");
         configurations.noise_gyo = (double) jo.get("sensor_noise_gyo");
         configurations.noise_mag = (double) jo.get("sensor_noise_mag");
         configurations.noise_prs = (double) jo.get("sensor_noise_prs");
 
         // configurations.ignore_gravity = (boolean) jo.get("ignore_gravity");
-//        System.out.println(configurations.deactivate_sensors);
         configurations.rotor_orientation = (String) jo.get("rotor_orientation");
-//        System.out.println(configurations.rotor_orientation);
 
         // iterating gravity Map
         Map gravity = ((Map) jo.get("gravity"));
@@ -758,7 +721,6 @@ public class Simulator implements Runnable {
         while (itr1.hasNext()) {
             Map.Entry pair = itr1.next();
             arguments[i] = (double) pair.getValue();
-//            System.out.println(arguments[i]);
             i++;
         }
         // a way to set gravity to default value
@@ -776,7 +738,6 @@ public class Simulator implements Runnable {
         while (itr2.hasNext()) {
             Map.Entry pair = itr2.next();
             arguments[i] = (double) pair.getValue();
-//            System.out.println(arguments[i]);
             i++;
         }
         configurations.magField = new Vector3d(arguments[0], arguments[1], arguments[2]);
@@ -788,7 +749,6 @@ public class Simulator implements Runnable {
         while (itr3.hasNext()) {
             Map.Entry pair = itr3.next();
             arguments[i] = (double) pair.getValue();
-//            System.out.println(arguments[i]);
             i++;
         }
         configurations.wind = new Vector3d(arguments[0], arguments[1], arguments[2]);
@@ -800,7 +760,6 @@ public class Simulator implements Runnable {
         while (itr4.hasNext()) {
             Map.Entry pair = itr4.next();
             arguments[i] = (double) pair.getValue();
-//            System.out.println(arguments[i]);
             i++;
         }
         configurations.windDeviation = new Vector3d(arguments[0], arguments[1], arguments[2]);
@@ -1058,51 +1017,6 @@ public class Simulator implements Runnable {
             } else if (arg.equals("-debug")) {
                 DEBUG_MODE = true;
             }
-            //==============================================================================
-//            else if(arg.equals("-deactivate")){
-//                configurations.deactivate_sensors = true;
-//            }
-//            else if(arg.equals("-orientation")){
-//                String orientation = args[i++];
-//                configurations.change_r_orientation = true;
-//                configurations.rotor_orientation = orientation;
-//            }
-//            else if(arg.equals("-ignore_gravity")){
-//                configurations.ignore_graviity = true;
-//            }
-//            else if(arg.equals("-gravity")){
-//                double x, y, z;
-////                if(i < args.length){
-//                    String stringx = args[i++];
-//                    String stringy = args[i++];
-//                    String stringz = args[i++];
-//                    x = Double.parseDouble(stringx);
-//                    y = Double.parseDouble(stringy);
-//                    z = Double.parseDouble(stringz);
-////                }
-//                configurations.change_gravity = true;
-//                configurations.gravity = new Vector3d(x, y, z);
-//            }
-//            else if(arg.equals("-magField")){
-//                double x, y, z;
-////                if(i < args.length){
-//                    String stringx = args[i++];
-//                    String stringy = args[i++];
-//                    String stringz = args[i++];
-//                    x = Double.parseDouble(stringx);
-//                    y = Double.parseDouble(stringy);
-//                    z = Double.parseDouble(stringz);
-////                }
-//                configurations.change_mag = true;
-//                configurations.magField = new Vector3d(x, y, z);
-//            }
-//            else if(arg.equals("-groundLevel")){
-//                String t = args[i++];
-//                double g = Double.parseDouble(t);
-//                configurations.change_ground_level = true;
-//                configurations.ground_level = g;
-//            }
-            //==============================================================================
 
             else {
                 System.err.println("Unknown flag: " + arg + ", usage: " + USAGE_STRING);
